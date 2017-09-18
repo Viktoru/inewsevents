@@ -1,0 +1,110 @@
+<?php
+
+/******************************************************************************
+ * Creating The inewsevents.install File
+ *****************************************************************************/
+
+/**
+ * @file
+ * Defines and manages the inewsevents schema.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+
+function inewsevents_schema() {
+  $schema['inewsevents'] = array(
+    'description' => 'The base table for nodes.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The primary identifier for a node.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The {users}.uid that added this subscription.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'nid' => array(
+        'description' => 'The {node}.nid that this subscription was added on.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+        'shortdescription' => array(
+        'description' => 'Short description of a new or event.',
+        'type' => 'varchar',
+        'length' => 2500,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'longdescription' => array(
+        'description' => 'Long description of a new or event.',
+        'type' => 'varchar',
+        'length' => 2500,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'columndate' => array(
+      'description' => 'The datetime for which that recipient submit a message.',
+      'type' => 'datetime',
+      'mysql_type' => 'datetime',
+      'pgsql_type' => 'timestamp without time zone',
+      'not null' => FALSE,
+      'default' => NULL,
+       ),
+
+    ),
+        'indexes' => array(
+          'node' => array('nid'),
+          'node_user' => array('nid', 'uid'),
+     ),
+
+    'primary key' => array('id'),
+  );
+  $schema['inewsevents_enabled'] = array(
+      'description' => 'Tracks whether record is enabled for a given node.',
+      'fields' => array(
+        'nid' => array(
+          'description' => 'The {node}.nid that has records enabled.',
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+      ),
+      'primary key' => array('nid'),
+    );
+
+    return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function inewsevents_uninstall() {
+  variable_del('inewsevents_types');
+}
+
+/**
+ * Implements hook_update_N().
+ */
+
+function inewsevents_update_N() {
+  $inewsevents_enabled_table = array(
+    'description' => 'Tracks whether a record is enabled for a given node.',
+    'fields' => array(
+      'nid' => array(
+        'description' => 'The {node}.nid that has record enabled.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
+  db_create_table('inewsevents_enabled', $inewsevents_enabled_table);
+}

@@ -1,0 +1,135 @@
+<?php
+/**
+ * @return array
+ * Location of the form: admin/config/content/inewsevents
+ * 1 represent the argument from the URL string.
+ * Ex.    example/node/4/inewsevetns
+ path possition    0   1   2
+ */
+function inewsevents_menu(){
+    $items = array();
+    $items['admin/config/content/inewsevents'] = array(
+        'title' => 'News and Events Form',
+        'description' => 'Add news and events to the form.',
+        'page callback' => 'inewsevents_geteventnews',
+        'page arguments' => array('inewsevents_form',1), //node id 1
+        'access arguments' => array('submit inewsevents'), // it'll respect the permission by accessing to submit a record.
+    );
+
+  /**
+   * Menu for admin reporting - records
+   */
+    $items['admin/reports/inewsevents'] = array(
+    'title' => 'News and Events Form',
+    'description' => 'View Records',
+    'page callback' => 'inewsevents_get_records',
+    'page arguments' => array('view inewsevents records'), //node id 1
+    'access arguments' => array('view inewsevents records'), // it'll respect the permission by accessing to submit a record.
+    'file' => 'inewsevents.admin.inc',
+  );
+    return $items;
+}
+
+/**
+ * @return array|mixed
+ * connect it to the page callback
+ */
+function inewsevents_geteventnews() {
+    return drupal_get_form('inewsevents_form');
+}
+
+/**
+ * @param $form
+ * @param $form_state
+ * @return mixed
+ * reset $nid so, we can get the right node.
+ * Provide the form to add an record.
+ */
+function inewsevents_form($form, &$form_state, $nid = 0){
+    global $user;
+
+    $form['shortdescription'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Add a short description about the new or event'),
+        '#required' => TRUE,
+    );
+    $form['longdescription'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Add New or Event'),
+        '#format' => 'full_html',
+        '#maxlenght' => 255,
+        '#weight' => 0,
+    );
+
+    $form['columndate'] = array(
+        '#title' => t('Select a start date'),
+        '#type' => 'date_popup',
+        '#date_format' => 'Y-m-d',
+        '#description' => t('Posting date'),
+        '#required' => TRUE,
+    );
+    $form['nid'] = array(
+        '#type' => 'hidden',
+        '#value' => $nid,
+    );
+    $form['submit'] = array(
+        '#title' => 'Title',
+        '#type' => 'submit',
+        '#value' => t('Submit News & Events'),
+    );
+
+    return $form;
+}
+/**
+ * @param $form
+ * @param $form_state
+ * Form set error if is empty.
+ */
+function inewsevents_form__validate($form, &$form_state){
+    $shortdescription = $form_state['value']['shortdescription'];
+    if ($shortdescription == 0){
+        $message = t('Please add a short description.');
+        form_set_error('shortdescription', $message);
+    }
+}
+/**
+ * @param $form
+ * @param $form_state
+ * submit record
+ * Be aware that .install file will determine you field characters
+ */
+function inewsevents_form_submit($form, &$form_state)
+{
+    global $user;
+    $nid = isset($form_state['values']['nid']) ? $form_state['values']['nid'] : 0;
+
+        db_insert('inewsevents')
+            ->fields(array(
+                'uid' => $user->uid,
+                'nid' => $nid,
+                'shortdescription' => $form_state['values']['shortdescription'],
+                'longdescription' => $form_state['values']['longdescription'],
+                'columndate' => $form_state['values']['columndate'],
+            ))->execute();
+        drupal_set_message('successfully saved');
+
+}
+
+/**
+ * Implements hook_permission().
+ */
+function inewsevents_permission() {
+
+  $perm = array(
+    'submit inewsevents' => array(
+      'title' => t('Submit inewsevents Records'),
+    ),
+    'view inewsevents report' => array(
+      'title' => t('View inewsevents Records'),
+    ),
+    'administer inewsevents settings' => array(
+      'title' => t('Administer inewsevents Settings'),
+    ),
+  );
+  return $perm;
+}
