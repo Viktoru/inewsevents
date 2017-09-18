@@ -24,7 +24,7 @@ function inewsevents_menu(){
     'description' => 'View Records',
     'page callback' => 'inewsevents_get_records',
     'page arguments' => array('view inewsevents records'), //node id 1
-    'access arguments' => array('view inewsevents records'), // it'll respect the permission by accessing to submit a record.
+    'access arguments' => array('view inewsevents records'),
     'file' => 'inewsevents.admin.inc',
   );
     return $items;
