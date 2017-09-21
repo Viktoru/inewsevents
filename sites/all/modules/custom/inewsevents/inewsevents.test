@@ -1,0 +1,49 @@
+<?php
+/**
+ * @file
+ *   Provide the automated tests for the inewsevents module.
+ */
+
+class InewseventsTestCase extends DrupalWebTestCase {
+
+  public static function getInfo() {
+    return [
+      'name' => 'Inewsevents functionality',
+      'description' => 'Test the inewsevents settings form functionality',
+      'group' => 'Inewsevents',
+    ];
+  }
+
+  /**
+   * Enable modules and create users with specific permissions.
+   */
+  function setUp() {
+    parent::setUp('inewsevents');
+    // Create users.
+    $this->admin_user = $this->drupalCreateUser(array(
+      'administer inewsevents settings',
+      'create page content',
+    ));
+  }
+
+  function testInewsEventsSettings(){
+    // Log in an admin user
+    $this->drupalLogout($this->admin_user);
+
+    // Check that no inewsevents settinga appear when adding a new group.
+    $this->drupalGet('node/add/page');
+    $this->assertNoText(t('Collect data for this node.'), 'The inewsevents settings were not found.');
+
+    // Change the settings to enable inewsevents on pages.
+    $edit = array('inewsevents_types[page]' => TRUE);
+
+    // $edit = array();
+    $this->drupalPost('admin/config/content/inewsevents', $edit, t('Save configuration'));
+
+    // Check that the inewsevents settings appear when adding a new page.
+    $this->drupalGet('node/add/page');
+    $this->assertText(t('Collect data for this node.'), 'The inewsevents settings were not found.');
+
+  }
+}
+
